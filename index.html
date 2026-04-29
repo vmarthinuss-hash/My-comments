@@ -1720,6 +1720,313 @@ function replacePronouns(text, name, gender, lang) {
   return first + ' ' + processed.join(' ');
 }
 
+// ─── HOME ACTIVITY SUGGESTIONS ───────────────────────────────────────────────
+// Organised by skill group and tier.
+// Each entry is a complete natural sentence to append after the improvement sentence.
+// 20 unique activities total, distributed across skill groups and tiers.
+
+const HOME_ACTIVITIES = {
+  en: {
+    // WRITING
+    writing: {
+      'needs-improvement': [
+        "To support progress at home, {pronoun} could try keeping a simple daily journal in English, writing just two or three sentences about their day.",
+        "A helpful activity at home would be copying short English sentences from a book or website and then rewriting them in {pronoun_own} own words.",
+        "Practising writing short emails or messages in English to a friend or family member would be a great way to build confidence outside of class."
+      ],
+      satisfactory: [
+        "At home, {pronoun} could improve writing skills by responding to short writing prompts found online, aiming to write a paragraph each time.",
+        "A useful habit would be to write a short summary in English after watching a video or reading an article, focusing on using new vocabulary."
+      ],
+      good: [
+        "To further develop writing skills, {pronoun} could try writing short opinion paragraphs on everyday topics and then checking them using a grammar tool such as Grammarly.",
+        "Writing a short blog or diary entry in English a few times a week would be an excellent way to consolidate and extend the strong progress already made."
+      ],
+      'very-good': [
+        "To push writing skills further, {pronoun} could challenge themselves by writing structured essays or letters on a variety of topics and seeking feedback from a teacher or language partner.",
+        "Reading high-quality English articles and then summarising them in writing would be an excellent way to continue developing sophistication and range."
+      ],
+      excellent: [
+        "To maintain and extend this exceptional level, {pronoun} could explore creative writing challenges online or consider entering English writing competitions to showcase their impressive ability."
+      ]
+    },
+    // SPEAKING
+    speaking: {
+      'needs-improvement': [
+        "At home, {pronoun} could build speaking confidence by reading English picture books or simple stories aloud for five to ten minutes each day.",
+        "A simple and effective activity would be to repeat phrases and sentences heard in English cartoons or children's shows, focusing on clear pronunciation."
+      ],
+      satisfactory: [
+        "To practise speaking at home, {pronoun} could try describing what they see in English while watching a favourite TV show or film with the sound turned down.",
+        "Recording short voice messages in English and playing them back to check pronunciation and fluency would be a very effective home practice habit."
+      ],
+      good: [
+        "A great way to develop spoken English further would be to watch English YouTube videos or podcasts on topics of interest and then try to summarise them aloud.",
+        "Joining an online English conversation club or language exchange app such as Tandem or HelloTalk would give valuable extra speaking practice outside the classroom."
+      ],
+      'very-good': [
+        "To continue pushing oral skills, {pronoun} could challenge themselves by watching TED Talks in English and then delivering their own short talk on a topic they are passionate about.",
+        "Engaging in regular online conversation exchanges with native or advanced English speakers through platforms such as iTalki would be an excellent next step."
+      ],
+      excellent: [
+        "To sustain this outstanding level of spoken English, {pronoun} could consider taking on public speaking challenges, such as debating in English or presenting at school events."
+      ]
+    },
+    // LISTENING
+    listening: {
+      'needs-improvement': [
+        "At home, {pronoun} could improve listening skills by watching short English cartoons or YouTube videos designed for learners, using subtitles to support understanding.",
+        "Listening to simple English songs and following along with the lyrics is an enjoyable and effective way to train the ear for spoken English at home."
+      ],
+      satisfactory: [
+        "A helpful habit would be to watch English TV programmes or films with English subtitles, gradually reducing reliance on subtitles as confidence grows.",
+        "Listening to short English podcasts designed for learners, such as those on the BBC Learning English website, would provide excellent extra practice at home."
+      ],
+      good: [
+        "To strengthen listening skills further, {pronoun} could try watching the news in English or listening to English radio programmes on topics of personal interest.",
+        "Using apps such as Spotify to listen to English-language podcasts on favourite topics would be an enjoyable way to build listening stamina and vocabulary."
+      ],
+      'very-good': [
+        "Watching films and documentaries in English without subtitles and then discussing them with a friend or family member would be an excellent challenge to further sharpen listening ability.",
+        "Listening to authentic English content such as audiobooks, TED Talks, or radio dramas would be a rewarding way to continue developing at this impressive level."
+      ],
+      excellent: [
+        "To continue growing as a listener, {pronoun} could explore challenging authentic materials such as academic lectures, long-form interviews, or English-language podcasts on complex topics."
+      ]
+    },
+    // READING
+    reading: {
+      'needs-improvement': [
+        "At home, {pronoun} could benefit greatly from reading simple English picture books or graded readers at their current level for ten to fifteen minutes each day.",
+        "Using a free app such as Oxford Reading Tree or Reading Eggs to practise reading at home in short, enjoyable sessions would help build confidence and fluency."
+      ],
+      satisfactory: [
+        "Reading short English articles or stories on topics of personal interest every day, even for just fifteen minutes, would help consolidate and extend reading skills.",
+        "Keeping a vocabulary notebook and writing down new words encountered while reading, along with their meanings and example sentences, would be a highly effective home habit."
+      ],
+      good: [
+        "To extend reading skills further, {pronoun} could choose an English novel or graded reader at a slightly challenging level and aim to read a chapter each week.",
+        "Reading a variety of text types in English at home, such as news articles, short stories, and websites on favourite topics, would broaden vocabulary and reading confidence."
+      ],
+      'very-good': [
+        "Reading challenging authentic English texts such as novels, newspaper opinion pieces, or science articles would be an excellent way to continue developing at this impressive level.",
+        "Joining an online English book club or following English-language blogs on topics of interest would provide rich reading material to sustain and extend these strong skills."
+      ],
+      excellent: [
+        "To maintain this exceptional reading ability, {pronoun} could explore complex literary texts, academic articles, or English-language journalism to continue stretching their impressive comprehension and vocabulary."
+      ]
+    },
+    // BEHAVIOR / PARTICIPATION — map to general engagement activities
+    behavior: {
+      'needs-improvement': [
+        "At home, reflecting on the classroom rules and discussing with a parent or guardian how to apply them consistently would be a positive step towards improving conduct in class."
+      ],
+      satisfactory: [
+        "Setting a personal goal each week, such as raising a hand before speaking or staying focused during lessons, and tracking progress at home would support continued behavioural improvement."
+      ],
+      good: [
+        "Continuing to reflect on classroom behaviour at home and setting small personal goals would help maintain and build on the already positive conduct shown in class."
+      ],
+      'very-good': [
+        "Exploring leadership opportunities, such as class monitor or group leader roles, and discussing their experience at home would be a great way to further develop the maturity and responsibility already demonstrated."
+      ],
+      excellent: [
+        "To continue modelling excellent conduct, {pronoun} could explore leadership and community roles both inside and outside of school that reflect the outstanding values already demonstrated in class."
+      ]
+    },
+    participation: {
+      'needs-improvement': [
+        "At home, {pronoun} could practise answering simple English questions aloud in front of a mirror or with a family member to build the confidence needed to participate more in class."
+      ],
+      satisfactory: [
+        "Preparing one or two ideas or questions before each English lesson at home would help {pronoun} feel more ready and confident to participate actively during class."
+      ],
+      good: [
+        "Watching English discussion programmes or debate videos at home and noting how speakers share and develop their ideas would be an inspiring way to continue building participation skills."
+      ],
+      'very-good': [
+        "Taking on extra speaking challenges at home, such as presenting a topic to a family member or recording a short video in English, would be a great way to extend the already impressive engagement shown in class."
+      ],
+      excellent: [
+        "To sustain this exceptional level of participation, {pronoun} could seek out extracurricular English opportunities such as drama clubs, debate teams, or online English discussion groups."
+      ]
+    }
+  },
+
+  vi: {
+    writing: {
+      'needs-improvement': [
+        "Để hỗ trợ việc học ở nhà, {pronoun} có thể thử viết nhật ký tiếng Anh đơn giản mỗi ngày, chỉ cần hai đến ba câu về những gì đã xảy ra trong ngày.",
+        "Một hoạt động hữu ích ở nhà là sao chép các câu tiếng Anh ngắn từ sách hoặc trang web, sau đó viết lại bằng từ ngữ của chính mình.",
+        "Thực hành viết email hoặc tin nhắn ngắn bằng tiếng Anh cho bạn bè hoặc thành viên gia đình sẽ là cách tuyệt vời để xây dựng sự tự tin ngoài lớp học."
+      ],
+      satisfactory: [
+        "Ở nhà, {pronoun} có thể cải thiện kỹ năng viết bằng cách trả lời các gợi ý viết ngắn tìm thấy trực tuyến, cố gắng viết một đoạn văn mỗi lần.",
+        "Một thói quen hữu ích là viết tóm tắt ngắn bằng tiếng Anh sau khi xem video hoặc đọc bài báo, tập trung vào việc sử dụng từ vựng mới."
+      ],
+      good: [
+        "Để phát triển kỹ năng viết hơn nữa, {pronoun} có thể thử viết các đoạn văn ý kiến ngắn về các chủ đề hàng ngày và kiểm tra bằng công cụ ngữ pháp như Grammarly.",
+        "Viết blog hoặc nhật ký ngắn bằng tiếng Anh vài lần một tuần sẽ là cách xuất sắc để củng cố và mở rộng tiến bộ đã đạt được."
+      ],
+      'very-good': [
+        "Để đẩy kỹ năng viết cao hơn nữa, {pronoun} có thể thách thức bản thân bằng cách viết các bài luận hoặc thư có cấu trúc về nhiều chủ đề khác nhau.",
+        "Đọc các bài báo tiếng Anh chất lượng cao và sau đó tóm tắt chúng bằng văn bản sẽ là cách xuất sắc để tiếp tục phát triển sự tinh tế và phạm vi."
+      ],
+      excellent: [
+        "Để duy trì và mở rộng mức độ xuất sắc này, {pronoun} có thể khám phá các thách thức viết sáng tạo trực tuyến hoặc tham gia các cuộc thi viết tiếng Anh."
+      ]
+    },
+    speaking: {
+      'needs-improvement': [
+        "Ở nhà, {pronoun} có thể xây dựng sự tự tin khi nói bằng cách đọc to sách tranh tiếng Anh hoặc các câu chuyện đơn giản trong năm đến mười phút mỗi ngày.",
+        "Một hoạt động đơn giản và hiệu quả là lặp lại các cụm từ và câu nghe được trong các chương trình hoạt hình hoặc phim thiếu nhi tiếng Anh."
+      ],
+      satisfactory: [
+        "Để luyện nói ở nhà, {pronoun} có thể thử mô tả những gì thấy bằng tiếng Anh khi xem chương trình TV hoặc phim yêu thích với âm thanh tắt.",
+        "Ghi lại các tin nhắn giọng nói ngắn bằng tiếng Anh và phát lại để kiểm tra phát âm và độ trôi chảy sẽ là thói quen luyện tập rất hiệu quả."
+      ],
+      good: [
+        "Một cách tuyệt vời để phát triển tiếng Anh nói hơn nữa là xem video YouTube hoặc podcast tiếng Anh về các chủ đề yêu thích và sau đó thử tóm tắt bằng lời nói.",
+        "Tham gia câu lạc bộ trò chuyện tiếng Anh trực tuyến hoặc ứng dụng trao đổi ngôn ngữ như Tandem hoặc HelloTalk sẽ tạo cơ hội luyện nói thêm ngoài lớp học."
+      ],
+      'very-good': [
+        "Để tiếp tục nâng cao kỹ năng nói, {pronoun} có thể thách thức bản thân bằng cách xem TED Talks bằng tiếng Anh và sau đó trình bày bài nói ngắn về chủ đề yêu thích.",
+        "Tham gia trao đổi trò chuyện trực tuyến thường xuyên với người nói tiếng Anh bản ngữ qua các nền tảng như iTalki sẽ là bước tiếp theo xuất sắc."
+      ],
+      excellent: [
+        "Để duy trì mức độ xuất sắc này, {pronoun} có thể xem xét tham gia các thách thức nói trước đám đông, chẳng hạn như tranh luận bằng tiếng Anh hoặc thuyết trình tại các sự kiện trường."
+      ]
+    },
+    listening: {
+      'needs-improvement': [
+        "Ở nhà, {pronoun} có thể cải thiện kỹ năng nghe bằng cách xem các chương trình hoạt hình tiếng Anh ngắn hoặc video YouTube dành cho người học, sử dụng phụ đề để hỗ trợ hiểu.",
+        "Nghe nhạc tiếng Anh đơn giản và theo dõi lời bài hát là cách thú vị và hiệu quả để luyện tai nghe tiếng Anh ở nhà."
+      ],
+      satisfactory: [
+        "Một thói quen hữu ích là xem các chương trình TV hoặc phim tiếng Anh có phụ đề tiếng Anh, dần dần giảm phụ thuộc vào phụ đề khi tự tin hơn.",
+        "Nghe các podcast tiếng Anh ngắn dành cho người học, như những podcast trên trang web BBC Learning English, sẽ cung cấp thực hành thêm xuất sắc ở nhà."
+      ],
+      good: [
+        "Để củng cố kỹ năng nghe hơn nữa, {pronoun} có thể thử xem tin tức tiếng Anh hoặc nghe các chương trình radio tiếng Anh về các chủ đề yêu thích.",
+        "Sử dụng ứng dụng như Spotify để nghe podcast tiếng Anh về các chủ đề yêu thích sẽ là cách thú vị để xây dựng sức bền nghe và từ vựng."
+      ],
+      'very-good': [
+        "Xem phim và tài liệu tiếng Anh không có phụ đề và sau đó thảo luận với bạn bè hoặc thành viên gia đình sẽ là thách thức xuất sắc để nâng cao khả năng nghe.",
+        "Nghe nội dung tiếng Anh xác thực như sách nói, TED Talks hoặc kịch phát thanh sẽ là cách bổ ích để tiếp tục phát triển ở mức độ ấn tượng này."
+      ],
+      excellent: [
+        "Để tiếp tục phát triển như một người nghe, {pronoun} có thể khám phá các tài liệu xác thực thách thức như bài giảng học thuật, phỏng vấn dài hoặc podcast tiếng Anh về các chủ đề phức tạp."
+      ]
+    },
+    reading: {
+      'needs-improvement': [
+        "Ở nhà, {pronoun} sẽ được hưởng lợi rất nhiều từ việc đọc sách tranh tiếng Anh đơn giản hoặc các cuốn sách phân cấp ở mức độ hiện tại trong mười đến mười lăm phút mỗi ngày.",
+        "Sử dụng ứng dụng miễn phí như Oxford Reading Tree để luyện đọc ở nhà trong các buổi ngắn thú vị sẽ giúp xây dựng sự tự tin và độ trôi chảy."
+      ],
+      satisfactory: [
+        "Đọc các bài báo hoặc câu chuyện tiếng Anh ngắn về các chủ đề yêu thích mỗi ngày, dù chỉ mười lăm phút, sẽ giúp củng cố và mở rộng kỹ năng đọc.",
+        "Giữ một cuốn sổ từ vựng và ghi lại các từ mới gặp khi đọc, cùng với nghĩa và câu ví dụ, sẽ là thói quen ở nhà rất hiệu quả."
+      ],
+      good: [
+        "Để mở rộng kỹ năng đọc hơn nữa, {pronoun} có thể chọn một cuốn tiểu thuyết tiếng Anh hoặc sách phân cấp ở mức độ hơi thách thức và đặt mục tiêu đọc một chương mỗi tuần.",
+        "Đọc nhiều loại văn bản tiếng Anh ở nhà, như bài báo, truyện ngắn và trang web về các chủ đề yêu thích, sẽ mở rộng từ vựng và sự tự tin đọc."
+      ],
+      'very-good': [
+        "Đọc các văn bản tiếng Anh xác thực thách thức như tiểu thuyết, bài báo ý kiến hoặc bài báo khoa học sẽ là cách xuất sắc để tiếp tục phát triển ở mức độ ấn tượng này.",
+        "Tham gia câu lạc bộ sách tiếng Anh trực tuyến hoặc theo dõi các blog tiếng Anh về chủ đề yêu thích sẽ cung cấp tài liệu đọc phong phú."
+      ],
+      excellent: [
+        "Để duy trì khả năng đọc xuất sắc này, {pronoun} có thể khám phá các văn bản văn học phức tạp, bài báo học thuật hoặc báo chí tiếng Anh để tiếp tục mở rộng khả năng hiểu và từ vựng."
+      ]
+    },
+    behavior: {
+      'needs-improvement': [
+        "Ở nhà, suy nghĩ về các quy tắc lớp học và thảo luận với phụ huynh về cách áp dụng chúng nhất quán sẽ là bước tích cực để cải thiện hành vi trong lớp."
+      ],
+      satisfactory: [
+        "Đặt mục tiêu cá nhân mỗi tuần, chẳng hạn như giơ tay trước khi nói hoặc tập trung trong các bài học, và theo dõi tiến độ ở nhà sẽ hỗ trợ cải thiện hành vi liên tục."
+      ],
+      good: [
+        "Tiếp tục suy nghĩ về hành vi trong lớp ở nhà và đặt các mục tiêu cá nhân nhỏ sẽ giúp duy trì và xây dựng dựa trên hành vi tích cực đã thể hiện."
+      ],
+      'very-good': [
+        "Khám phá các cơ hội lãnh đạo, như vai trò lớp trưởng hoặc trưởng nhóm, và thảo luận kinh nghiệm ở nhà sẽ là cách tuyệt vời để phát triển thêm sự trưởng thành và trách nhiệm đã thể hiện."
+      ],
+      excellent: [
+        "Để tiếp tục làm gương cho hành vi xuất sắc, {pronoun} có thể khám phá các vai trò lãnh đạo và cộng đồng cả trong và ngoài trường học."
+      ]
+    },
+    participation: {
+      'needs-improvement': [
+        "Ở nhà, {pronoun} có thể luyện trả lời các câu hỏi tiếng Anh đơn giản to trước gương hoặc với thành viên gia đình để xây dựng sự tự tin cần thiết để tham gia nhiều hơn trong lớp."
+      ],
+      satisfactory: [
+        "Chuẩn bị một hoặc hai ý tưởng hoặc câu hỏi trước mỗi bài học tiếng Anh ở nhà sẽ giúp {pronoun} cảm thấy sẵn sàng và tự tin hơn để tham gia tích cực trong lớp."
+      ],
+      good: [
+        "Xem các chương trình thảo luận tiếng Anh hoặc video tranh luận ở nhà và ghi chú cách người nói chia sẻ và phát triển ý tưởng sẽ là cách đầy cảm hứng để tiếp tục xây dựng kỹ năng tham gia."
+      ],
+      'very-good': [
+        "Đảm nhận các thách thức nói thêm ở nhà, như trình bày chủ đề cho thành viên gia đình hoặc quay video ngắn bằng tiếng Anh, sẽ là cách tuyệt vời để mở rộng sự tham gia đã ấn tượng trong lớp."
+      ],
+      excellent: [
+        "Để duy trì mức độ tham gia xuất sắc này, {pronoun} có thể tìm kiếm các cơ hội tiếng Anh ngoại khóa như câu lạc bộ kịch, đội tranh luận hoặc nhóm thảo luận tiếng Anh trực tuyến."
+      ]
+    }
+  }
+};
+
+// Map standard skills back to a home-activity skill group
+const STD_SKILL_MAP = {
+  '11L1':'listening','11L2':'listening','11L3':'listening','11L4':'listening',
+  '11R1':'reading', '11R2':'reading', '11R3':'reading', '11R4':'reading',
+  '11W1':'writing', '11W2':'writing', '11W3':'writing', '11W4':'writing'
+};
+
+/**
+ * Pick the skill with the lowest score among rated skills.
+ * Falls back to overall tier if nothing found.
+ * Returns a home-activity sentence string (already name/pronoun substituted).
+ */
+function pickHomeActivity(lang, gender, name, ratedSkillScores, overallTier) {
+  // ratedSkillScores: { skillKey: numericScore, ... }
+  // Find the lowest-scoring skill
+  let weakestSkill = null;
+  let lowestScore = 11;
+
+  Object.keys(ratedSkillScores).forEach(sk => {
+    const n = parseInt(ratedSkillScores[sk]);
+    if (!isNaN(n) && n < lowestScore) {
+      lowestScore = n;
+      weakestSkill = sk;
+    }
+  });
+
+  // Map standards to skill group
+  let activityGroup = weakestSkill ? (STD_SKILL_MAP[weakestSkill] || weakestSkill) : null;
+
+  // Ensure the group exists in our bank; fall back to writing if not
+  const bank = HOME_ACTIVITIES[lang];
+  if (!activityGroup || !bank[activityGroup]) activityGroup = 'writing';
+
+  const tier = scoreTier(lowestScore) || overallTier;
+  const tierBank = bank[activityGroup][tier] || bank[activityGroup]['satisfactory'];
+  if (!tierBank || !tierBank.length) return '';
+
+  // Pronoun substitution
+  const pr = {
+    en: { male:{ s:'he', p:'his' }, female:{ s:'she', p:'her' } },
+    vi: { male:{ s:'bạn ấy', p:'của bạn ấy' }, female:{ s:'bạn ấy', p:'của bạn ấy' } }
+  };
+  const p = (pr[lang] || pr.en)[gender] || pr.en.male;
+
+  let sentence = rand(tierBank);
+  sentence = sentence.replace(/{pronoun_own}/g, p.p);
+  sentence = sentence.replace(/{pronoun}/g, p.s);
+  sentence = sentence.replace(/{name}/g, name);
+  return sentence;
+}
+
 // ─── GENERATE SINGLE ─────────────────────────────────────────────────────────
 function generateComment() {
   const name = document.getElementById('studentName').value.trim();
@@ -1760,8 +2067,16 @@ function generateComment() {
   const impPool = getTemplate(commentLang, 'improvements', overallTier);
   if (impPool && impPool.length) parts.push(rand(impPool).replace(/{name}/g, name));
 
+  // Build ratedSkillScores for home activity picker
+  const ratedSkillScores = {};
+  activeSkills.forEach(sk => { if (selectedScores[sk] !== undefined) ratedSkillScores[sk] = selectedScores[sk]; });
+
   let full = parts.join(' ');
   full = replacePronouns(full, name, gender, commentLang);
+
+  // Append home activity suggestion
+  const homeActivity = pickHomeActivity(commentLang, gender, name, ratedSkillScores, overallTier);
+  if (homeActivity) full = full + ' ' + homeActivity;
 
   document.getElementById('commentBox').textContent = full;
   document.getElementById('outputSection').classList.add('visible');
@@ -1905,6 +2220,10 @@ function processBatchFile() {
 
       let full = parts.join(' ');
       full = replacePronouns(full, name, gender, commentLang);
+
+      // Append home activity suggestion
+      const homeActivity = pickHomeActivity(commentLang, gender, name, scoreRecord, ot);
+      if (homeActivity) full = full + ' ' + homeActivity;
 
       generatedResults.push({ name, gender, ...scoreRecord, comment: full });
     });
